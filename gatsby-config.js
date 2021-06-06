@@ -1,5 +1,5 @@
 module.exports = {
-  pathPrefix: `/blog`,
+  pathPrefix: `/gsoc-blogs`,
   siteMetadata: {
     title: `Google Summer of Code 2021`,
     author: {
