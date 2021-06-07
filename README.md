@@ -1,5 +1,4 @@
 ## Google Summer of Code, BlogPoint :speech_balloon:
-Tracking my progress through these weekly posts
 
 ## Installation
 1. Pull repository
