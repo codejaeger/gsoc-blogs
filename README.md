@@ -1,4 +1,4 @@
-## Google Summer of Code, BlogPoint :speech_balloon:
+## BlogPoint :speech_balloon:
 
 ## Installation
 1. Pull repository

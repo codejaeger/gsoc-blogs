@@ -1,13 +1,13 @@
 module.exports = {
   pathPrefix: `/gsoc-blogs`,
   siteMetadata: {
-    title: `Google Summer of Code 2021`,
+    title: `Web logs`,
     author: {
       name: `Debabrata Mandal`,
-      summary: `participating under the JuliaLang Org.`,
+      summary: `to explain stuff to others.`,
     },
-    description: `A blog describing my experience during GSoC from getting selected to completion.`,
-    siteUrl: `https://codejaeger.github.io/gsoc-blogs`,
+    description: `A blog describing my learnings, experiences and love for computer science.`,
+    siteUrl: `https://codejaeger.github.io/myweblogs`,
     social: {
       github: `codejaeger`,
     },
