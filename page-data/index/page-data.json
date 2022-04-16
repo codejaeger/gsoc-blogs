@@ -1,0 +1,5 @@
+{
+    "componentChunkName": "component---src-pages-index-js",
+    "path": "/",
+    "result": {"data":{"site":{"siteMetadata":{"title":"Web logs"}},"allMarkdownRemark":{"nodes":[{"excerpt":"What is an API? Okay, maybe that’s not why you visited this page, just jump directly to Julia Interfaces . Interfaces Package interfaces…","fields":{"slug":"/julia/package-api-design/"},"frontmatter":{"date":"April 16, 2022","title":"API design: Using Julia interfaces","description":"A good API a package keeps the debugger away."}},{"excerpt":"TL;DR This site will contain the following:- Technical posts Coding experiences Project demonstrations Challenges/Quizzes for the more…","fields":{"slug":"/hello-world/"},"frontmatter":{"date":"October 30, 2021","title":"Introduction and Purpose","description":"Some trivia about this site"}}]}},"pageContext":{}},
+    "staticQueryHashes": ["2841359383","3257411868"]}

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title><![CDATA[Web logs]]></title><description><![CDATA[A blog describing my learnings, experiences and love for computer science.]]></description><link>https://codejaeger.github.io/myweblogs</link><generator>GatsbyJS</generator><lastBuildDate>Sat, 16 Apr 2022 23:03:28 GMT</lastBuildDate><item><title><![CDATA[API design: Using Julia interfaces]]></title><description><![CDATA[What is an API? Okay, maybe that’s not why you visited this page, just jump directly to Julia Interfaces . Interfaces Package interfaces…]]></description><link>https://codejaeger.github.io/myweblogs/julia/package-api-design/</link><guid isPermaLink="false">https://codejaeger.github.io/myweblogs/julia/package-api-design/</guid><pubDate>Sat, 16 Apr 2022 22:12:03 GMT</pubDate><content:encoded>&lt;h3&gt;What is an API?&lt;/h3&gt;
+&lt;p&gt;Okay, maybe that’s not why you visited this page, just jump directly to &lt;a href=&quot;#julia-interfaces&quot;&gt;Julia Interfaces&lt;/a&gt; .&lt;/p&gt;
+&lt;h3&gt;Interfaces&lt;/h3&gt;
+&lt;h4&gt;Package interfaces&lt;/h4&gt;
+&lt;p&gt;Julia packages are defined as a collection of functions, abstract and non-abstract types which are made available (mostly via exports) to any dependent package. It is possible to have packages that just define a few abstract types and a few functions/properties over these abstract types and the user of the package is expected to write their own custom types conforming to the guidelines set by the package. These guidelines ensure that the user’s custom types are usable with the functions supplied by the package and only the smallest subsection of code that must be user defined is allowed to be exposed. You might already guess the advantage behind this, yes lesser chances of bugs getting introduced just because the user forgot to read the docs properly. &lt;/p&gt;
+&lt;p&gt;The package we consider for our discussion is :- &lt;a href=&quot;https://github.com/JuliaGraphs/NetworkLayout.jl&quot;&gt;NetworkLayouts.jl&lt;/a&gt;. In fact this article was inspired by unique way the API for this package was designed.&lt;/p&gt;
+&lt;p&gt;Before that let’s consider a simpler example.&lt;/p&gt;
+&lt;p&gt;Let’s say we have a &lt;code class=&quot;language-text&quot;&gt;struct&lt;/code&gt; called &lt;code class=&quot;language-text&quot;&gt;Ball&lt;/code&gt; and you want this ball to be usable by a package which defines useful utilites for ball type objects. For all we know this could just be a coloring function for the ball. However, this coloring function would not be able to color our ball if it did not know the shape of the ball. So what the package creator could do is define a &lt;code class=&quot;language-text&quot;&gt;shape&lt;/code&gt; function on a abstract type which our ball must be a sub type of. Now, we can provide our own function as part of our user code to support the &lt;code class=&quot;language-text&quot;&gt;shape&lt;/code&gt; call made by the package coloring function. Thus we have successfully, restricted the user to just define a shape function and call it from our package code whenever necessary.&lt;/p&gt;
+&lt;p&gt;A simple code example for this would be&lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;julia&quot;&gt;&lt;pre class=&quot;language-julia&quot;&gt;&lt;code class=&quot;language-julia&quot;&gt;&lt;span class=&quot;token comment&quot;&gt;# Inside the coloring package&lt;/span&gt;
+
+&lt;span class=&quot;token keyword&quot;&gt;abstract&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;type&lt;/span&gt; BallLike &lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;token keyword&quot;&gt;function&lt;/span&gt; coloring&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;bl&lt;span class=&quot;token punctuation&quot;&gt;::&lt;/span&gt;BallLike&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    shp &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; shape&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;a&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token comment&quot;&gt;# add coloring&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;token keyword&quot;&gt;function&lt;/span&gt; shape&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;a&lt;span class=&quot;token punctuation&quot;&gt;::&lt;/span&gt;A&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;token comment&quot;&gt;# package code ends here&lt;/span&gt;
+&lt;span class=&quot;token comment&quot;&gt;# user code below&lt;/span&gt;
+
+&lt;span class=&quot;token keyword&quot;&gt;struct&lt;/span&gt; Ball &lt;span class=&quot;token operator&quot;&gt;&amp;lt;:&lt;/span&gt; BallLike
+&lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;token keyword&quot;&gt;function&lt;/span&gt; shape&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;b&lt;span class=&quot;token punctuation&quot;&gt;::&lt;/span&gt;Ball&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; 
+    &lt;span class=&quot;token comment&quot;&gt;# return shape&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;
+
+b &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; B&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+coloring&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;b&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h4&gt;Julia interfaces&lt;/h4&gt;
+&lt;p&gt;To look at the actual page in the julia developer manuals, refer to the following &lt;a href=&quot;https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-iteration&quot;&gt;link&lt;/a&gt;. In short, Julia interfaces are a informal collection of functions which when supported (by your type) can unlock a wide suite of convenient functions. &lt;/p&gt;
+&lt;p&gt;If you took a glance at the link above, you might notice that interfaces are very popular when it comes to adding support for iteration, indexing, broadcasting etc. for your package. These interfaces are decided by Julia &lt;code class=&quot;language-text&quot;&gt;Base&lt;/code&gt; and are arguably minimal to enable a whole lot of features for your package.&lt;/p&gt;
+&lt;h6&gt;A dummy package inspired from NetworkLayout.jl&lt;/h6&gt;
+&lt;p&gt;In a few words, this package is required in case you have a graph (or a adjacent matrix) and you wish to create a 2D representation of your graph. There are many options that this package provides to do so but we will not discuss that in this article. Our focus will be on the way the package was designed to make the addition of new network implementations as flexible as possible.&lt;/p&gt;
+&lt;p&gt;If we start to look into the module file, we will notice it defines a couple of abstract types and subtypes defined on them. We will also see some macros and functors (functions attached to a type).&lt;/p&gt;
+&lt;p&gt;Let’s start by identifying what entails when we add a abstract type to a package. It means that we can define funtions with arguments of that type, attach functions to that type, create new abstract or non-abstract sub-types from that type or simply new types aggregating over that type.
+Whew! that’s a lot. &lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;julia&quot;&gt;&lt;pre class=&quot;language-julia&quot;&gt;&lt;code class=&quot;language-julia&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;abstract&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;type&lt;/span&gt; A &lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;token keyword&quot;&gt;function&lt;/span&gt; forA&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;a&lt;span class=&quot;token punctuation&quot;&gt;::&lt;/span&gt;A&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;attachedToA&lt;span class=&quot;token punctuation&quot;&gt;::&lt;/span&gt;A&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; someFuncDefinedSomewhere&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;token keyword&quot;&gt;abstract&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;type&lt;/span&gt; B &lt;span class=&quot;token operator&quot;&gt;&amp;lt;:&lt;/span&gt; A &lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;token keyword&quot;&gt;struct&lt;/span&gt; C &lt;span class=&quot;token operator&quot;&gt;&amp;lt;:&lt;/span&gt; A
+&lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;token keyword&quot;&gt;struct&lt;/span&gt; D
+    c&lt;span class=&quot;token punctuation&quot;&gt;::&lt;/span&gt;C
+    a&lt;span class=&quot;token punctuation&quot;&gt;::&lt;/span&gt;A
+&lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now, even this might not be enough, we may need to add another of abstract types sub-typed over A. Let’s call it &lt;code class=&quot;language-text&quot;&gt;subA&lt;/code&gt;. This type might have some actual package code implemented for it not like the all-knowing mega type &lt;code class=&quot;language-text&quot;&gt;A&lt;/code&gt;. &lt;/p&gt;
+&lt;p&gt;Below, we consider one such use case. Let’s say we want to export a function which requires a user to define only a certain property (or a function) over its custom types. The property we consider below is &lt;strong&gt;iterability&lt;/strong&gt; which can be enabled by supporting &lt;code class=&quot;language-text&quot;&gt;Base.iterate()&lt;/code&gt;. &lt;/p&gt;
+&lt;div class=&quot;gatsby-highlight&quot; data-language=&quot;julia&quot;&gt;&lt;pre class=&quot;language-julia&quot;&gt;&lt;code class=&quot;language-julia&quot;&gt;&lt;span class=&quot;token keyword&quot;&gt;abstract&lt;/span&gt; &lt;span class=&quot;token keyword&quot;&gt;type&lt;/span&gt; subA &lt;span class=&quot;token operator&quot;&gt;&amp;lt;:&lt;/span&gt; A &lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;token keyword&quot;&gt;function&lt;/span&gt; someFunc&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;sa&lt;span class=&quot;token punctuation&quot;&gt;::&lt;/span&gt;subA&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    iter &lt;span class=&quot;token operator&quot;&gt;=&lt;/span&gt; Base&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;iterate&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;sa&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token comment&quot;&gt;# do something useful with iter&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;token comment&quot;&gt;# user code below&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;struct&lt;/span&gt; someType &lt;span class=&quot;token operator&quot;&gt;&amp;lt;:&lt;/span&gt; subA
+&lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;
+
+&lt;span class=&quot;token comment&quot;&gt;#define someType with Base.iterate&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;function&lt;/span&gt; Base&lt;span class=&quot;token punctuation&quot;&gt;.&lt;/span&gt;iterate&lt;span class=&quot;token punctuation&quot;&gt;(&lt;/span&gt;st&lt;span class=&quot;token punctuation&quot;&gt;::&lt;/span&gt;someType&lt;span class=&quot;token punctuation&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;token comment&quot;&gt;#do something&lt;/span&gt;
+&lt;span class=&quot;token keyword&quot;&gt;end&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;!-- ##### Are we done?
+
+Well no, unless we export `someFunc` noone can really use it outside of our package. So what do we do? Note that exporting `someFunc(::subA)` is useless since `subA` is an abstract type. We need to export the `someFunc` method (overloads in julia) defined over the user type `someType`. The problem is we don&apos;t know this type unless we let the user use the package which almost always happens after we have published the package. 
+
+##### Macros to our rescue!
+One of my favorite part of Julia is this beast called macro. They let you add code which can modify or create new code! How cool is that?!
+
+We need to create only one macro for the user to use when they are defining their package. Let&apos;s call it `@addcall` (inspired from NetworksLayout.jl). If you are new to macros, reading up the developer manuals is the best place to know more about it.
+
+```julia
+macro addcall(expr::Expr)
+    typedef = expr.args[2]
+    name = typedef.args[1]
+    fname = Symbol(lowercase(String(name)))
+    return quote
+        $(esc(expr))
+        $(esc(fname))(g; kwargs...) = ($name(; kwargs...), g)
+        export $(esc(fname))
+    end
+end
+```
+
+Now, we can export `@addcall` and let the user use it on their `struct` as follows
+```julia
+@addcall struct someType &lt;: subA
+end
+```
+This should automatically create and export `someFunc(::someType)` for anybody to use. Yes, now we are done! --&gt;
+&lt;p&gt;Bravo! we have succesfully created a package that can define a very high level interface for users to extend to their free will without the possibility of many bugs getting added.&lt;/p&gt;</content:encoded></item><item><title><![CDATA[Introduction and Purpose]]></title><description><![CDATA[TL;DR This site will contain the following:- Technical posts Coding experiences Project demonstrations Challenges/Quizzes for the more…]]></description><link>https://codejaeger.github.io/myweblogs/hello-world/</link><guid isPermaLink="false">https://codejaeger.github.io/myweblogs/hello-world/</guid><pubDate>Sat, 30 Oct 2021 22:12:03 GMT</pubDate><content:encoded>&lt;h3&gt;TL;DR&lt;/h3&gt;
+&lt;p&gt;This site will contain the following:-&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Technical posts&lt;/li&gt;
+&lt;li&gt;Coding experiences&lt;/li&gt;
+&lt;li&gt;Project demonstrations&lt;/li&gt;
+&lt;li&gt;Challenges/Quizzes for the more daring folks&lt;/li&gt;
+&lt;li&gt;Concept/Topic explanations&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;That being said, if you are still willing to know more about what to expect under each banner
+follow along.&lt;/p&gt;
+&lt;h2&gt;Motivation&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Sharing is caring ;-)&lt;/li&gt;
+&lt;li&gt;Knowledge shared is knowledge gained!&lt;/li&gt;
+&lt;li&gt;Keep track of what I learn and record how long I can retain it.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Contents&lt;/h2&gt;
+&lt;h3&gt;Technical posts&lt;/h3&gt;
+&lt;p&gt;Ideally, I would like to cover topics spanning multiple areas in computer science. However, due to my current priorities and interests you may find a positive bias towards AI, ML and computer vision concepts. If you are looking for something similar great let’s get going else look into the challenge/quizzes section. That part should be for everyone :-)&lt;/p&gt;
+&lt;h3&gt;Coding Experiences&lt;/h3&gt;
+&lt;p&gt;This is something I have been thinking of doing for a long time. Often, we stumble across complex problems while working which with some amount of hard thinking we can find a solution to. These nameless problems are important additions to our experiences. Replicating these problems, become very difficult due to hidden source codes, too many dependent components, random aha! moments without any clear explanations (pun intended) etc. Instead of losing these to the sands of time, maybe I could create sandbox environments for such problems and let others try it out and find solutions to. Sometimes, it might just be a thought-provoking question without a clear answer from my side.&lt;/p&gt;
+&lt;h3&gt;Project demonstrations&lt;/h3&gt;
+&lt;p&gt;I love working on open source projects, hobby projects and projects to help humanity! In the past I have found my work not attracting too many views in spite of working hard on them. I identified my mistake in failing to advertise them on popular platforms and producing eye-catchy themes and posts for my work. This time I decided I shall blog about all my mini as well as large projects.&lt;/p&gt;
+&lt;h3&gt;Challenges/Quizzes&lt;/h3&gt;
+&lt;p&gt;This part is inspired from &lt;a href=&quot;https://adventofcode.com/&quot;&gt;Advent of Code&lt;/a&gt; by Eric Wastl. The idea here is to occasionally release uncommon puzzles related to computer science and mathematics. Rewards :- Nothing decided yet, but who knows what I come up with ;-)&lt;/p&gt;
+&lt;h3&gt;Concept explanations&lt;/h3&gt;
+&lt;p&gt;Finally, the reason why a tech blog site is used most of the times. Concepts explained in a neat and crisp manner with sufficient illustrations is one of the major inspirations for this site. The hunt now is just for a theme and a style of explaining that will be unique to this site.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Thanks for reading!!&lt;/strong&gt;&lt;/p&gt;</content:encoded></item></channel></rss>
