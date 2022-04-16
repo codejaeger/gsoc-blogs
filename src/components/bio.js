@@ -46,7 +46,7 @@ const Bio = () => {
         <p>
           Written by <strong>{author.name}</strong> {author?.summary || null}
           {` `}
-          <a href={`https://github.com/codejaeger/gsoc-blogs`}>
+          <a href={`https://github.com/codejaeger/myweblogs`}>
             You can star this on Github to get updates.
           </a>
         </p>

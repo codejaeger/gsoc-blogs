@@ -1,5 +1,5 @@
 module.exports = {
-  pathPrefix: `/gsoc-blogs`,
+  pathPrefix: `/myweblogs`,
   siteMetadata: {
     title: `Web logs`,
     author: {

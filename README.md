@@ -8,4 +8,4 @@
 
 
 #### Fix:
-1. Markdown links into the document do not work on the gatsby website.
+1. Markdown links into the document do not work on the gatsby website locally.
